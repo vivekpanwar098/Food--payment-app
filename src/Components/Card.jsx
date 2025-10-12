@@ -1,29 +1,37 @@
 import React from 'react'
-import image1 from "../assets/image1.avif"
-import { LuLeafyGreen } from "react-icons/lu";
+import { useDispatch } from 'react-redux';
+import { AddItem } from "../redux/CartSlice";
+import { toast } from 'react-toastify';
 
-const Card = ({name,image,id,price,type}) => {
+const Card = ({name, image, id, price, type}) => {
+  let dispatch = useDispatch()
+  
   return (
-    <div className="flex items-center  bg-gray-100 p-4 rounded-lg shadow-lg hover:border-5 hover:border-green-300 transition-all scroll-smooth duration-10">
+    <div className="flex items-center bg-gray-100 p-4 rounded-lg shadow-lg hover:border-5 hover:border-green-300 transition-all scroll-smooth duration-10">
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden w-80">
         <div className="relative h-64 bg-gray-200">
           <img
             src={image}
-            alt="Pancakes"
+            alt={name}
             className="w-full h-full object-cover"
           />
         </div>
         <div className="p-5">
           <h2 className="text-2xl font-bold text-gray-800 mb-3">{name}</h2>
-          
           <div className="flex items-center justify-between mb-4">
             <span className="text-green-600 font-bold text-xl">Rs {price}/-</span>
             <div className="flex justify-center items-center gap-2 bg-green-50 px-3 py-1 rounded-full">
-              <span className="text-green-600 text-2xl">{type==="veg"? "🥬" : "🍗"}</span>
-              <span >{type}</span>
+              <span className="text-green-600 text-2xl">{type === "veg" ? "🥬" : "🍗"}</span>
+              <span>{type}</span>
             </div>
           </div>
-          <button className="w-full bg-green-400 hover:bg-green-500 text-gray-800 font-semibold py-3 rounded-lg transition-colors">
+          <button 
+            className="w-full bg-green-400 hover:bg-green-500 text-gray-800 font-semibold py-3 rounded-lg transition-colors"
+            onClick={() => {
+              dispatch(AddItem({id: id, name: name, price: price, image: image, qty: 1}));
+              toast.success("Item added");
+            }}
+          >
             Add to Dish
           </button>
         </div>
