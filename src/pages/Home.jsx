@@ -1,4 +1,5 @@
 import React, { useContext } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ ADD THIS
 import Nav from "../Components/Nav";
 import { Categories } from "../Category";
 import Card from "../Components/Card";
@@ -10,10 +11,10 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 
 function Home() {
+  const navigate = useNavigate(); // ✅ ADD THIS
   let { cate, setCate, input, showCart, setShowCart } = useContext(dataContext);
-
   const items = useSelector((state) => state.cart.items || []);
-
+  
   function filter(category) {
     if (category === "All") {
       setCate(food_items);
@@ -25,13 +26,28 @@ function Home() {
     }
   }
 
-  let subtotal = items.reduce(
-    (total, item) => total + item.qty * item.price,
-    0
-  );
+  let subtotal = items.reduce((total, item) => total + (item.qty * item.price), 0);
   let deliveryfee = 20;
   let taxes = (subtotal * 0.5) / 100;
   let total = Math.floor(subtotal + deliveryfee + taxes);
+
+  // ✅ PAYMENT PAGE PE REDIRECT KARO
+  const handleProceedToPayment = () => {
+    if (items.length === 0) {
+      toast.error('Cart is empty!');
+      return;
+    }
+
+    navigate('/payment', {
+      state: {
+        total: total,
+        subtotal: subtotal,
+        deliveryfee: deliveryfee,
+        taxes: taxes,
+        items: items
+      }
+    });
+  };
 
   return (
     <div className="bg-slate-200 w-full min-h-screen">
@@ -66,7 +82,7 @@ function Home() {
             />
           ))
         ) : (
-          <div className="text-green-400 font-semibold text-3xl">Not found</div>
+          <div className="text-green-400 font-semibold text-lg">Not found</div>
         )}
       </div>
 
@@ -75,13 +91,8 @@ function Home() {
           showCart ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <header className="w-[100%] flex justify-between items-center">
-          <span
-            className="text-green-400 text-[18px] font-semibold cursor-pointer"
-            onClick={() => {
-              toast.success("Order placed successfully!");
-            }}
-          >
+        <header className="w-[100%] flex justify-between items-center mb-4">
+          <span className="text-green-400 text-[18px] font-semibold">
             Order Items
           </span>
           <RxCross2
@@ -89,6 +100,7 @@ function Home() {
             onClick={() => setShowCart(false)}
           />
         </header>
+        
         <div className="w-full">
           {items && items.length > 0 ? (
             items.map((item) => (
@@ -105,39 +117,44 @@ function Home() {
             <p className="text-center text-gray-500 mt-4">Cart is empty</p>
           )}
         </div>
+        
         <div className="w-full border-t-2 border-b-2 border-gray-400 mt-7 flex flex-col gap-4 p-8">
           <div className="w-full flex justify-between items-center">
-            <span className="text-xl text-gray-600 font-semibold">
-              Subtotal
-            </span>
-            <span className="text-green-400 font-semibold text-lg">
-              Rs {subtotal}/-
-            </span>
+            <span className="text-xl text-gray-600 font-semibold">Subtotal</span>
+            <span className="text-green-400 font-semibold text-lg">Rs {subtotal}/-</span>
           </div>
           <div className="w-full flex justify-between items-center">
-            <span className="text-xl text-gray-600 font-semibold">
-              Delivery
-            </span>
-            <span className="text-green-400 font-semibold text-lg">
-              Rs {deliveryfee}/-
-            </span>
+            <span className="text-xl text-gray-600 font-semibold">Delivery</span>
+            <span className="text-green-400 font-semibold text-lg">Rs {deliveryfee}/-</span>
           </div>
           <div className="w-full flex justify-between items-center">
             <span className="text-xl text-gray-600 font-semibold">Taxes</span>
-            <span className="text-green-400 font-semibold text-lg">
-              Rs {taxes.toFixed(2)}/-
-            </span>
+            <span className="text-green-400 font-semibold text-lg">Rs {taxes.toFixed(2)}/-</span>
           </div>
         </div>
-        <div className="w-full flex justify-between items-center p-8">
+        
+        <div className="w-full flex justify-between items-center p-8 border-b-2 border-gray-300">
           <span className="text-2xl text-gray-600 font-semibold">Total</span>
-          <span className="text-green-400 font-semibold text-2xl">
-            Rs {total}/-
-          </span>
+          <span className="text-green-400 font-semibold text-2xl">Rs {total}/-</span>
         </div>
-        <button className="w-[80%] bg-green-400 hover:bg-green-500 text-gray-800 font-semibold py-3 rounded-lg transition-colors">
-          Place Order
-        </button>
+        
+        {/* ✅ NEW PAYMENT BUTTON */}
+        {items && items.length > 0 ? (
+          <button
+            onClick={handleProceedToPayment}
+            className="w-[80%] bg-green-400 hover:bg-green-500 text-gray-800 font-semibold py-3 rounded-lg transition-colors mt-6 flex items-center justify-center gap-2"
+          >
+            <span>💳</span>
+            <span>Proceed to Payment</span>
+          </button>
+        ) : (
+          <button 
+            className="w-[80%] bg-gray-400 text-gray-800 font-semibold py-3 rounded-lg cursor-not-allowed mt-6"
+            disabled
+          >
+            Add Items to Order
+          </button>
+        )}
       </div>
     </div>
   );
