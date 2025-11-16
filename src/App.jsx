@@ -18,6 +18,6 @@ function App() {
       <ToastContainer />
     </div>
   );
-}auy
+}
 
 export default App;
